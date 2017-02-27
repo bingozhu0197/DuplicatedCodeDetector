@@ -9,7 +9,7 @@
 #include "Common.hpp"
 #include "Json.hpp"
 
-const string SPACE_PER_LEVEL = "    ";
+const int SPACE_PER_LEVEL = 4;
 void Json::dump(stringstream & p_data, const string & p_fileName)
 {
     ofstream l_output(p_fileName);
@@ -33,12 +33,6 @@ void Json::dump(stringstream & p_data, const string & p_fileName)
 
 string Json::indent(unsigned int l_level)
 {
-    string l_space;
-    while (l_level != 0)
-    {
-         l_space += SPACE_PER_LEVEL;
-         --l_level;
-    }
-    return l_space;
+    return string(l_level * SPACE_PER_LEVEL, ' ');
 }
 
