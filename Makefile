@@ -15,9 +15,9 @@
 # Please tweak the following variable definitions as needed by your
 # project, except TARGET, which you can use in your own targets but
 # shouldn't modify.
-CXX = g++
-CXXFLAGS += -g -Wall -Werror -Wextra -std=c++1y
-LDFLAGS +=
+CXX =g++
+CXXFLAGS += -g -Wall -Werror -Wextra -std=c++17
+LDFLAGS += -lstdc++fs
 
 TARGET = clone_detect
 
@@ -51,13 +51,15 @@ SRC_OBJ = $(SRC_DIR)/Main.o\
 all: $(TARGET)
 
 $(TARGET):$(SRC_OBJ)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@
+	$(CXX) $^ -o $@   $(CXXFLAGS) $(LDFLAGS)
 
 clean:
 	cd AT/ && python cleanup.py
 	-rm -f $(TARGET) $(SRC_OBJ)
 	make -C ut/build/ clean
 
+version:
+	$(CXX) --version
 # Rules for ut
 ut:ut/build/Makefile
 	@echo compiling UT
@@ -79,6 +81,4 @@ CASES:= # end of the line
 endif
 
 at:$(TARGET)
-	@cp -f clone_detect AT/ && cd AT/ && python runtest.py $(CASES) 
-
-
+	@cp -f clone_detect AT/ && cd AT/ && python runtest.py $(CASES)

@@ -9,4 +9,3 @@
 #include "Common.hpp"
 
 extern FilePaths getCodeFilePathsRecursively(const std::string & p_directory);
-

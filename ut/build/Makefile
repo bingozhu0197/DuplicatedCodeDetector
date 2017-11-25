@@ -2,7 +2,7 @@
 #
 
 CXX = g++
-CXXFLAGS += -g -Wall -Werror -Wextra -std=c++1y
+CXXFLAGS += -g -Wall -Werror -Wextra -std=c++1z
 LDFLAGS += -DGTEST_HAS_PTHREAD=1
 
 TARGET = clone_detect_test
@@ -12,17 +12,15 @@ SRC_DIR = ../../src
 TEST_DIR = ../cases
 
 # Points to directory where project header files is.
-SRC_INC = -I../googletest/gtest-1.7.0/include/ \
-          -I../googletest/gmock-1.7.0/include/ \
-          -I$(SRC_DIR) \
+SRC_INC =  -I$(SRC_DIR) \
           -I$(TEST_DIR)/mock
-          
-LIBS = -lpthread \
-       -L../googletest/gtest-1.7.0/lib -lgtest -lgtest_main \
-       -L../googletest/gmock-1.7.0/lib -lgmock\
-       -fexceptions
 
-# Lists of all objects. *.o means an object file of c file, 
+LIBS = -lpthread -lgtest -lgtest_main -lgmock -lstdc++fs
+       #-L../googletest/gtest-1.7.0/lib -lgtest -lgtest_main \
+       #-L../googletest/gmock-1.7.0/lib -lgmock\
+       #-fexceptions
+
+# Lists of all objects. *.o means an object file of c file,
 # *.oxx means an object file of cpp file. You have to list all object
 # files here with directories in prefix.
 SRC_OBJ = $(SRC_DIR)/CurlyBracesFormatter.o\
@@ -49,15 +47,15 @@ TEST_OBJ = $(TEST_DIR)/TestCommon.o\
            $(TEST_DIR)/GetCodeFileNamesTestSuite.o\
            $(TEST_DIR)/SpaceFormatterTestSuite.o\
            $(TEST_DIR)/RemoveEmptyLinesTestSuite.o
-           
+
 
 # House-keeping build targets.
 all: $(TARGET)
 
 $(TARGET):$(SRC_OBJ) $(TEST_OBJ)
-	$(CXX) $(CXXFLAGS) $(SRC_INC) $(LDFLAGS)  $^ $(LIBS) -o $@
+	$(CXX) $(CXXFLAGS) $(SRC_INC) $(LDFLAGS)  $^ -o $@  $(LIBS)
 	./$@
-    
+
 # Rules to compile all c/cpp files
 %.o:%.c
 	@echo compiling SRC files

@@ -50,31 +50,31 @@ int main(int argc, char * argv[])
     {
         exit(EXIT_FAILURE);
     }
-      
+
     auto l_codeFilePaths = getCodeFilePathsRecursively(l_argsParser.getCodeFileDirectory());
     if (l_codeFilePaths.empty())
     {
         cout << "no code files found" << std::endl;
         exit(EXIT_FAILURE);
     }
-    
+
     auto l_duplicatedCodeBlock = make_shared<DuplicatedCodeBlocks>();
 
     auto l_builderFactory = make_shared<DuplicatedCodeBlocksBuilderFactory>(
-        l_duplicatedCodeBlock, 
+        l_duplicatedCodeBlock,
         l_argsParser.getDuplicatedBlockLeastCodeLines());
-    
+
     shared_ptr<IFileReader> l_fileReader = make_shared<FileReader>();
     applyFileLinesFormatter(l_argsParser, l_fileReader);
     DuplicatedCodeBlocksDetector l_duplicatedCodeBlocksDetector(
         l_fileReader,
-        l_builderFactory); 
-    
+        l_builderFactory);
+
     for (auto & l_codeFilePath : l_codeFilePaths)
     {
         l_duplicatedCodeBlocksDetector.scanFile(l_codeFilePath);
     }
-    
+
     if (l_argsParser.getOutputJsonFileName().empty())
     {
         l_duplicatedCodeBlock->dumpDuplicatedCodeLines();
@@ -83,7 +83,6 @@ int main(int argc, char * argv[])
     {
         l_duplicatedCodeBlock->dumpDuplicatedCodeInfo(l_argsParser.getOutputJsonFileName());
     }
-    
+
     return 0;
 }
-
