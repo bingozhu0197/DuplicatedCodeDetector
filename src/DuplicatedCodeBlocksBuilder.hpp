@@ -6,7 +6,8 @@
 #pragma once
 
 #include <memory>
-#include <map>
+//#include <map>
+#include <unordered_map>
 #include "Common.hpp"
 #include "CodeLine.hpp"
 #include "CodeBlock.hpp"
@@ -20,7 +21,7 @@ public:
         : m_duplicatedCodeBlock(p_duplicatedCodeBlock),
           m_lastCodeLineNumber(p_codeLineNumber)
     {}
-    
+
     unsigned int getCodeLineCount() const
     {
         return m_lineCount;
@@ -34,7 +35,7 @@ public:
     {
         m_duplicatedCodeBlock.first.updateEndLineNumber(p_newEndLineNum);
     }
-    
+
     void updatePeerBlockEndLineNumber(LineNumber p_newEndLineNum)
     {
         m_duplicatedCodeBlock.second.updateEndLineNumber(p_newEndLineNum);
@@ -44,12 +45,12 @@ public:
     {
         return m_lastCodeLineNumber;
     }
-    
+
     void updateLastCodeLineNumber(LineNumber p_codeLineNum)
     {
         m_lastCodeLineNumber = p_codeLineNum;
     }
-        
+
     DuplicatedCodeBlock getDuplicatedCodeBlock() const
     {
         return m_duplicatedCodeBlock;
@@ -61,32 +62,32 @@ private:
     LineNumber m_lastCodeLineNumber;
 };
 
-
-class DuplicatedCodeBlocksBuilder final : public IDuplicatedCodeBlocksBuilder 
+using BuildingBlocks = unordered_multimap<FilePath, BuildingBlock>;
+class DuplicatedCodeBlocksBuilder final : public IDuplicatedCodeBlocksBuilder
 {
 public:
     DuplicatedCodeBlocksBuilder(
         const FilePath & p_filePath,
-        const shared_ptr<IDuplicatedCodeBlocks> & p_duplicatedCodeBlocks, 
+        const shared_ptr<IDuplicatedCodeBlocks> & p_duplicatedCodeBlocks,
         unsigned int p_blockLeastCodeLines);
-    
+
     ~DuplicatedCodeBlocksBuilder();
-    
+
     void addCodeLine(const CodeLine & p_codeLine, const vector<CodeLine> & p_duplicatedCodeLines) override;
     void finishAddingCodeLine() override;
 
 private:
     vector<CodeLine> updateBuildingBlocksContinued(
-        const CodeLine & p_codeLine, 
+        const CodeLine & p_codeLine,
         const vector<CodeLine> & p_duplicatedCodeLines);
-    
+
     void createNewBuildingBlocks(
-        const CodeLine & p_codeLine, 
+        const CodeLine & p_codeLine,
         const vector<CodeLine> & p_duplicatedCodeLines);
-    
+
     void pushBuildingBlocksNotConitnued(
         const vector<CodeLine> & p_duplicatedCodeLines);
-    
+
     void pushAllBuildingBlocks();
     void clearBuildingBlocks();
     void pushToDuplicatedCodeBlocks(const BuildingBlock & p_duplicatedCodeBlock);
@@ -94,7 +95,5 @@ private:
     FilePath m_filePath;
     shared_ptr<IDuplicatedCodeBlocks> m_duplicatedCodeBlocks;
     unsigned int m_blockLeastCodeLines;
-    multimap<FilePath, BuildingBlock> m_buildingBlocks;
+    BuildingBlocks m_buildingBlocks;
 };
-
-

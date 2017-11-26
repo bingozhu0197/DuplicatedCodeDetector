@@ -14,7 +14,7 @@ public:
     CodeLineStatus(bool p_isNewLine)
         : m_isNewLine(p_isNewLine)
     {}
-    
+
     bool isNewLine() const
     {
         return m_isNewLine;
@@ -34,11 +34,13 @@ public:
         const FilePath & p_filePath,
         CodeLineStatus p_codeLineStatus,
         LineNumber p_fileLineNumber,
-        LineNumber p_codeLineNumber)
+        LineNumber p_codeLineNumber,
+        LineNumber p_startDuplicatingLineNumber)
         : m_filePath(p_filePath),
           m_codeLineStatus(p_codeLineStatus),
           m_fileLineNumber(p_fileLineNumber),
-          m_codeLineNumber(p_codeLineNumber)
+          m_codeLineNumber(p_codeLineNumber),
+          m_startDuplicatingLineNumber(p_startDuplicatingLineNumber)
     {}
 
     FilePath getFilePath() const
@@ -50,17 +52,22 @@ public:
     {
         return m_codeLineNumber;
     }
-    
+
     LineNumber getFileLineNumber() const
     {
         return m_fileLineNumber;
+    }
+
+    LineNumber getStartDuplicatingLineNumber() const
+    {
+        return m_startDuplicatingLineNumber;
     }
 
     CodeLineStatus getLineStatus() const
     {
         return m_codeLineStatus;
     }
-    
+
     bool operator == (const CodeLine & rhs) const
     {
         return m_filePath == rhs.m_filePath
@@ -73,5 +80,5 @@ public:
     CodeLineStatus m_codeLineStatus;
     LineNumber m_fileLineNumber;
     LineNumber m_codeLineNumber;
+    LineNumber m_startDuplicatingLineNumber;
 };
-

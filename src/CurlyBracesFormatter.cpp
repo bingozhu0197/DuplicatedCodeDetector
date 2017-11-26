@@ -10,12 +10,12 @@
 size_t CurlyBracesFormatter::getSplitPosition(const string & p_lineText)
 {
     size_t l_splitPosition = 0;
-        
+
     auto l_curlyBracePos = p_lineText.find_first_of("{}");
     if (l_curlyBracePos == string::npos)
     {
         return l_splitPosition;
-    }    
+    }
 
     if (l_curlyBracePos != 0
         && !all_of(begin(p_lineText),  begin(p_lineText) + l_curlyBracePos, ::isspace))
@@ -23,8 +23,8 @@ size_t CurlyBracesFormatter::getSplitPosition(const string & p_lineText)
         l_splitPosition = l_curlyBracePos;
     }
     else if (l_curlyBracePos != p_lineText.length() - 1
-             && !all_of(begin(p_lineText) + l_curlyBracePos + 1,  
-                        end(p_lineText), 
+             && !all_of(begin(p_lineText) + l_curlyBracePos + 1,
+                        end(p_lineText),
                         ::isspace))
     {
         l_splitPosition = l_curlyBracePos + 1;
@@ -41,7 +41,7 @@ Lines CurlyBracesFormatter::splitLineAtCurlyBrace(Lines && p_lines)
         {
             continue;
         }
-        
+
         auto l_newLine = l_line->second.substr(l_splitPosition);
         l_line->second.erase(l_splitPosition);
         if (!l_newLine.empty())
@@ -52,8 +52,17 @@ Lines CurlyBracesFormatter::splitLineAtCurlyBrace(Lines && p_lines)
     return p_lines;
 }
 
-Lines CurlyBracesFormatter::getLines(const FilePath & p_filePath)
+Lines CurlyBracesFormatter::eraseCurlyBraces(Lines && p_lines)
 {
-    return splitLineAtCurlyBrace(m_fileReader->getLines(p_filePath));
+    for (auto & l_line : p_lines)
+    {
+        auto & l_lineText = l_line.second;
+        l_lineText.erase(remove_if(l_lineText.begin(), l_lineText.end(), [](char p_char){ return p_char == '{' || p_char == '}';}), l_lineText.end());
+    }
+    return p_lines;
 }
 
+Lines CurlyBracesFormatter::getLines(const FilePath & p_filePath)
+{
+    return eraseCurlyBraces(m_fileReader->getLines(p_filePath));
+}

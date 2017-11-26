@@ -17,6 +17,5 @@ public:
     unique_ptr<IDuplicatedCodeBlocksBuilder> createBuilder(const FilePath & p_filePath) override;
 private:
     shared_ptr<IDuplicatedCodeBlocks> m_duplicatedCodeBlocks;
-    unsigned int m_blockLeastCodeLines;   
+    unsigned int m_blockLeastCodeLines;
 };
-

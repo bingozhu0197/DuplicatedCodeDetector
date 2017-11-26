@@ -16,7 +16,7 @@
 # project, except TARGET, which you can use in your own targets but
 # shouldn't modify.
 CXX =g++
-CXXFLAGS += -g -Wall -Werror -Wextra -std=c++17
+CXXFLAGS += -g -Wall -Werror -Wextra -O2 -pg -std=c++17
 LDFLAGS += -lstdc++fs
 
 TARGET = clone_detect
@@ -55,7 +55,7 @@ $(TARGET):$(SRC_OBJ)
 
 clean:
 	cd AT/ && python cleanup.py
-	-rm -f $(TARGET) $(SRC_OBJ)
+	rm -f $(TARGET) $(SRC_OBJ)
 	make -C ut/build/ clean
 
 version:

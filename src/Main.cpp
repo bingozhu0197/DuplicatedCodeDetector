@@ -57,7 +57,7 @@ int main(int argc, char * argv[])
         cout << "no code files found" << std::endl;
         exit(EXIT_FAILURE);
     }
-
+    cout << "find files: " << l_codeFilePaths.size() << endl;
     auto l_duplicatedCodeBlock = make_shared<DuplicatedCodeBlocks>();
 
     auto l_builderFactory = make_shared<DuplicatedCodeBlocksBuilderFactory>(
@@ -66,9 +66,12 @@ int main(int argc, char * argv[])
 
     shared_ptr<IFileReader> l_fileReader = make_shared<FileReader>();
     applyFileLinesFormatter(l_argsParser, l_fileReader);
+
     DuplicatedCodeBlocksDetector l_duplicatedCodeBlocksDetector(
         l_fileReader,
-        l_builderFactory);
+        l_builderFactory,
+        l_codeFilePaths.size(),
+        l_argsParser.getDuplicatedBlockLeastCodeLines());
 
     for (auto & l_codeFilePath : l_codeFilePaths)
     {

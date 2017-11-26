@@ -11,7 +11,7 @@
 
 DuplicatedCodeBlocksBuilder::DuplicatedCodeBlocksBuilder(
     const FilePath & p_filePath,
-    const shared_ptr<IDuplicatedCodeBlocks> & p_duplicatedCodeBlocks, 
+    const shared_ptr<IDuplicatedCodeBlocks> & p_duplicatedCodeBlocks,
     unsigned int p_blockLeastCodeLines)
     : m_filePath(p_filePath),
       m_duplicatedCodeBlocks(p_duplicatedCodeBlocks),
@@ -26,7 +26,7 @@ DuplicatedCodeBlocksBuilder::~DuplicatedCodeBlocksBuilder()
 }
 
 void DuplicatedCodeBlocksBuilder::pushToDuplicatedCodeBlocks(const BuildingBlock & p_duplicatedCodeBlock)
-{ 
+{
     if (p_duplicatedCodeBlock.getCodeLineCount() < m_blockLeastCodeLines)
     {
         return;
@@ -45,36 +45,38 @@ void DuplicatedCodeBlocksBuilder::pushAllBuildingBlocks()
     {
         pushToDuplicatedCodeBlocks(p_buildingBlock.second);
     }
-    clearBuildingBlocks();
+    //    clearBuildingBlocks();
 }
 
 void DuplicatedCodeBlocksBuilder::pushBuildingBlocksNotConitnued(const std::vector<CodeLine> & p_duplicatedCodeLines)
 {
+    auto l_duplicatedCodeLines = p_duplicatedCodeLines;
     for (auto l_buildingBlock = m_buildingBlocks.cbegin(); l_buildingBlock != m_buildingBlocks.cend(); )
     {
         auto l_codeLine = find_if(
-            begin(p_duplicatedCodeLines), 
-            end(p_duplicatedCodeLines), 
+            begin(l_duplicatedCodeLines),
+            end(l_duplicatedCodeLines),
             [&l_buildingBlock](const auto & p_codeLine)
             {
                 return l_buildingBlock->first == p_codeLine.getFilePath()
                        && l_buildingBlock->second.getLastCodeLineNumber() + 1 == p_codeLine.getCodeLineNumber();
             });
 
-        if (l_codeLine == end(p_duplicatedCodeLines))
+        if (l_codeLine == end(l_duplicatedCodeLines))
         {
             pushToDuplicatedCodeBlocks(l_buildingBlock->second);
             l_buildingBlock = m_buildingBlocks.erase(l_buildingBlock);
         }
         else
         {
+            l_duplicatedCodeLines.erase(l_codeLine);
             l_buildingBlock = next(l_buildingBlock);
         }
     }
 }
 
 void DuplicatedCodeBlocksBuilder::createNewBuildingBlocks(
-    const CodeLine & p_codeLine, 
+    const CodeLine & p_codeLine,
     const std::vector<CodeLine> & p_duplicatedCodeLines)
 {
     if (!p_codeLine.getLineStatus().isNewLine())
@@ -92,27 +94,28 @@ void DuplicatedCodeBlocksBuilder::createNewBuildingBlocks(
             BuildingBlock(
                 l_duplicatedCodeLine.getCodeLineNumber(),
                 make_pair(
-                    CodeBlock{m_filePath, p_codeLine.getFileLineNumber()},
-                    CodeBlock{l_duplicatedCodeLine.getFilePath(), 
-                        l_duplicatedCodeLine.getFileLineNumber()}))
+                    CodeBlock{m_filePath, p_codeLine.getStartDuplicatingLineNumber()},
+                    CodeBlock{l_duplicatedCodeLine.getFilePath(),
+                        l_duplicatedCodeLine.getStartDuplicatingLineNumber()}))
         );
     }
 }
 
 std::vector<CodeLine> DuplicatedCodeBlocksBuilder::updateBuildingBlocksContinued(
-    const CodeLine & p_codeLine, 
+    const CodeLine & p_codeLine,
     const std::vector<CodeLine> & p_duplicatedCodeLines)
 {
     std::vector<CodeLine> l_remainingDuplicatedCodeLine;
-    
+
+    BuildingBlocks l_tmpBuilding;
     for (const auto & l_duplicatedCodeLine : p_duplicatedCodeLines)
     {
         auto l_duplicatingBlock = m_buildingBlocks.equal_range(l_duplicatedCodeLine.getFilePath());
         if (l_duplicatingBlock.first != l_duplicatingBlock.second)
         {
             auto l_codeBlock = find_if(
-                l_duplicatingBlock.first, 
-                l_duplicatingBlock.second, 
+                l_duplicatingBlock.first,
+                l_duplicatingBlock.second,
                 [&l_duplicatedCodeLine](const auto & p_codeBlock)
                 {
                     return p_codeBlock.second.getLastCodeLineNumber() + 1 == l_duplicatedCodeLine.getCodeLineNumber();
@@ -124,18 +127,21 @@ std::vector<CodeLine> DuplicatedCodeBlocksBuilder::updateBuildingBlocksContinued
                 l_codeBlock->second.updatePeerBlockEndLineNumber(l_duplicatedCodeLine.getFileLineNumber());
                 l_codeBlock->second.updateLastCodeLineNumber(l_duplicatedCodeLine.getCodeLineNumber());
                 l_codeBlock->second.increaseCodeLineCount();
+                l_tmpBuilding.insert(std::move(*l_codeBlock));
+                m_buildingBlocks.erase(l_codeBlock);
                 continue;
             }
         }
         l_remainingDuplicatedCodeLine.push_back(l_duplicatedCodeLine);
     }
-
+    pushAllBuildingBlocks();
+    m_buildingBlocks.swap(l_tmpBuilding);
     return l_remainingDuplicatedCodeLine;
 }
 
 void DuplicatedCodeBlocksBuilder::addCodeLine(const CodeLine & p_codeLine, const std::vector<CodeLine> & p_duplicatedCodeLines)
 {
-    pushBuildingBlocksNotConitnued(p_duplicatedCodeLines);
+    // pushBuildingBlocksNotConitnued(p_duplicatedCodeLines);
 
     auto l_remainingDuplicatedCodeLine = updateBuildingBlocksContinued(p_codeLine, p_duplicatedCodeLines);
     createNewBuildingBlocks(p_codeLine, l_remainingDuplicatedCodeLine);
@@ -145,4 +151,3 @@ void DuplicatedCodeBlocksBuilder::finishAddingCodeLine()
 {
     pushAllBuildingBlocks();
 }
-
